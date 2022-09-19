@@ -65,6 +65,9 @@ class CMFLogger(Logger):
         self,
         mlmd_filename: str,
         pipeline_name: str = "cmf_pipeline_logs",
+        pipeline_stage: str = "train",
+        execution_type: str = "DNN",
+        graph: bool = False,
         #version: Optional[Union[int, str]] = None,
         #prefix: str = "",
         flush_logs_every_n_steps: int = FLUSH_LOGS_DEFAULT_STEPS,
@@ -72,6 +75,9 @@ class CMFLogger(Logger):
         super().__init__()
         self._mlmd_filename = mlmd_filename
         self._pipeline_name = pipeline_name or ""
+        self._pipeline_stage = pipeline_stage or ""
+        self._execution_type = execution_type or ""
+        self._graph = graph
         #self._version = version
         #self._prefix = prefix
         #self._experiment: Optional[ExperimentWriter] = None
@@ -84,14 +90,23 @@ class CMFLogger(Logger):
 
         #Create metadata writer
         #cmf = cmf.Cmf(filename="mlmd", pipeline_name="Test-env")   
-        cmf_logger = cmf.Cmf(filename=self.filename, pipeline_name=self.name)   
+        if(graph):
+            cmf_logger = cmf.Cmf(filename=self.filename, pipeline_name=self.name,graph=True)   
+        else:
+            cmf_logger = cmf.Cmf(filename=self.filename, pipeline_name=self.name)   
 
         #Create CMF Context
-        context = cmf_logger.create_context(pipeline_stage="Train",
-                                   custom_properties={"user-metadata1":"metadata_value"})
+        if (self._pipeline_stage != ""):
+            context = cmf_logger.create_context(pipeline_stage=self._pipeline_stage)
+        else:
+            context = cmf_logger.create_context(pipeline_stage="Train", custom_properties={"user-metadata1":"metadata_value"})
 
         #Create CMF Execution (Instances of Context)
-        execution = cmf_logger.create_execution(execution_type="Train-1", custom_properties = {"user-metadata1":"metadata_value"})
+        if (self._execution_type != ""):
+            execution = cmf_logger.create_execution(execution_type=self._execution_type)
+        else:
+            execution = cmf_logger.create_execution(execution_type="Train-1", custom_properties = {"user-metadata1":"metadata_value"})
+        
 
         self._logger = cmf_logger
         self._execution = execution
