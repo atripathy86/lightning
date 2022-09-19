@@ -28,7 +28,7 @@ from torch import Tensor
 from pytorch_lightning.loggers.logger import Logger, rank_zero_experiment
 from pytorch_lightning.utilities.logger import _add_prefix, _convert_params
 from pytorch_lightning.utilities.rank_zero import rank_zero_only, rank_zero_warn
-from pytorch_lightning.loggers.base import rank_zero_experiment
+#from pytorch_lightning.loggers.base import rank_zero_experiment
 
 DEFAULT_MLMD_FILE = "mlmd"
 FLUSH_LOGS_DEFAULT_STEPS = 100
@@ -162,7 +162,7 @@ class CMFLogger(Logger):
         self.metrics = {k: _handle_value(v) for k, v in metrics.items()}
 
         print("Calling log_metric")
-        self.experiment.log_metric("training_metrics", self.metrics)
+        self.experiment.log_metric("training_metrics" + "_" + str(self.experiment.execution.id), self.metrics)
 
         
         if step is not None and (step + 1) % self._flush_logs_every_n_steps == 0:
@@ -178,7 +178,7 @@ class CMFLogger(Logger):
         if not self.metrics:
             return
         print("Calling commit_metrics")
-        self.experiment.commit_metrics("training_metrics")
+        self.experiment.commit_metrics("training_metrics" + "_" + str(self.experiment.execution.id))
 
         #CMF Log Artifacts
         #cmf.log_dataset(input, "input", custom_properties={"user-metadata1":"metadata_value"})
